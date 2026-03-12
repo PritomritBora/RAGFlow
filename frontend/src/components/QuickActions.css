@@ -55,8 +55,15 @@
 }
 
 .action-icon {
-  font-size: 1.75rem;
-  line-height: 1;
+  width: 28px;
+  height: 28px;
+  color: #3b82f6;
+  transition: all 0.3s ease;
+}
+
+.action-pill:hover:not(:disabled) .action-icon {
+  color: #60a5fa;
+  transform: scale(1.1);
 }
 
 .action-title {
