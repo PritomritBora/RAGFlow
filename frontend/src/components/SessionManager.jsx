@@ -5,7 +5,7 @@ export default function SessionManager({ onSessionChange, currentSession }) {
 
   const createNewSession = async () => {
     try {
-      const response = await fetch('http://localhost:8000/session/new', {
+      const response = await fetch('http://localhost:8001/session/new', {
         method: 'POST'
       })
       const data = await response.json()

@@ -1,5 +1,6 @@
 from typing import Dict, Optional
 from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from .agents.query_analyzer import QueryAnalyzerAgent
 from .agents.retrieval_planner import RetrievalPlannerAgent
 from .agents.self_evaluator import SelfEvaluationAgent
@@ -19,11 +20,19 @@ logger = logging.getLogger(__name__)
 
 class ResearchOrchestrator:
     def __init__(self, settings: Settings):
-        self.llm = ChatOpenAI(
-            model=settings.llm_model,
-            api_key=settings.openai_api_key,
-            temperature=0
-        )
+        # Initialize LLM based on provider
+        if settings.llm_provider == "gemini":
+            self.llm = ChatGoogleGenerativeAI(
+                model=settings.llm_model,
+                google_api_key=settings.google_api_key,
+                temperature=0
+            )
+        else:  # openai
+            self.llm = ChatOpenAI(
+                model=settings.llm_model,
+                api_key=settings.openai_api_key,
+                temperature=0
+            )
         
         # Agents
         self.query_analyzer = QueryAnalyzerAgent(self.llm)
@@ -32,11 +41,15 @@ class ResearchOrchestrator:
         self.answer_generator = AnswerGeneratorAgent(self.llm)
         
         # Core services
+        api_key = settings.google_api_key if settings.llm_provider == "gemini" else settings.openai_api_key
+        
         self.vector_store = VectorStore(
             host=settings.qdrant_host,
             port=settings.qdrant_port,
             collection_name=settings.collection_name,
-            embedding_model=settings.embedding_model
+            embedding_model=settings.embedding_model,
+            provider=settings.llm_provider,
+            api_key=api_key
         )
         
         self.retriever = MultiHopRetriever(self.vector_store)

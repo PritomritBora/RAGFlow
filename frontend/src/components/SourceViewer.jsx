@@ -1,11 +1,23 @@
 export default function SourceViewer({ citations, steps, analysis, validation }) {
+  // Handle missing data gracefully
+  if (!analysis || !validation || !citations || !steps) {
+    return (
+      <div className="source-viewer">
+        <h3>Loading...</h3>
+        <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
+          Waiting for query results...
+        </p>
+      </div>
+    )
+  }
+
   return (
     <div className="source-viewer">
       <h3>Query Analysis</h3>
       <div className="analysis-box">
         <div className="analysis-item">
           <span className="label">Type:</span>
-          <span className="value">{analysis.type}</span>
+          <span className="value">{analysis.type || 'N/A'}</span>
         </div>
         <div className="analysis-item">
           <span className="label">Multi-hop:</span>

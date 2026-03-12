@@ -5,18 +5,27 @@ from .embeddings import EmbeddingService
 import uuid
 
 class VectorStore:
-    def __init__(self, host: str, port: int, collection_name: str, embedding_model: str):
+    def __init__(self, host: str, port: int, collection_name: str, embedding_model: str, 
+                 provider: str = "openai", api_key: str = None):
         self.client = QdrantClient(host=host, port=port)
         self.collection_name = collection_name
-        self.embeddings = EmbeddingService(embedding_model)
-        self._ensure_collection()
+        
+        # Determine vector size based on provider
+        vector_size = 768 if provider == "gemini" else 1536
+        
+        self.embeddings = EmbeddingService(
+            model=embedding_model, 
+            provider=provider,
+            api_key=api_key
+        )
+        self._ensure_collection(vector_size)
     
-    def _ensure_collection(self):
+    def _ensure_collection(self, vector_size: int):
         collections = self.client.get_collections().collections
         if not any(c.name == self.collection_name for c in collections):
             self.client.create_collection(
                 collection_name=self.collection_name,
-                vectors_config=VectorParams(size=1536, distance=Distance.COSINE)
+                vectors_config=VectorParams(size=vector_size, distance=Distance.COSINE)
             )
     
     def add_documents(self, chunks: List[Dict]):
